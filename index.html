@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>Program Pemindai Gambar</title>
+  
+  </head>
+  <body>
+    <h4>Pilih gambar yang akan di pindai menjadi teks</h4>
+    <input type="file" id="uploader">
+    <div id="status">
+
+    </div>
+    <div id="progress">
+
+    </div>
+    <div id="result" style="font-weight: bold;">
+
+    </div>
+
+    <script src="node_modules/tesseract.js/dist/tesseract.min.js"></script>
+    <script>
+        
+      const recognize = async ({ target: { files }  }) => {
+        const gambarnya = files[0];
+        
+        const worker = Tesseract.createWorker({
+            
+            langPath: 'traineddata',
+            corePath: 'node_modules/tesseract.js-core/tesseract-core.wasm.js',
+            logger: m => {
+                document.getElementById('status').innerHTML = m.status;
+                document.getElementById('progress').innerHTML = (m.progress*100)+"%"
+            }
+        });
+        Tesseract.setLogging(true);
+        work();
+
+        async function work() {
+            await worker.load();
+            await worker.loadLanguage('eng');
+            await worker.initialize('eng');
+
+
+            result = await worker.recognize(gambarnya);
+            console.log(result.data);
+
+            var cek = false;
+
+            //menampilkan hasil ocr
+            document.getElementById('result').innerHTML = result.data.text;
+
+
+
+            //mendeteksi NIK KTP
+            // const texts = result.data.text.split(/\r?\n/);
+            // for (let i = 0; i < texts.length; i++) {
+            //     if (texts[i].indexOf('NIK') > -1)
+            //     {   
+            //         var text = texts[i];
+            //         text = text.replace('NIK', "");
+            //         text = text.replace(/[\W_]+/g, "");
+            //         text = text.replace(' ', "");
+            //         document.getElementById('result').innerHTML = text;
+            //         cek = true;
+            //     }
+                
+            // }
+
+            // if(!cek && texts.length > 0){
+            //   alert('NIK TIDAK DI TEMUKAN');
+            // }
+
+            // if(texts.length <= 0){
+            //   alert("TULISAN DI GAMBAR TIDAK DITEMUKAN/TETBACA")
+            // }
+            
+
+            await worker.terminate();
+        }
+      }
+      const elm = document.getElementById('uploader');
+      elm.addEventListener('change', recognize);
+    </script>
+  </body>
+</html>
